@@ -1,108 +1,119 @@
-# The Seven Emirates — A story in paper
+# The Seven Emirates — A Sustainability Adventure
 
-A standalone React / Three.js pop-up book prototype. The first chapter contains procedural papercraft interpretations of the Sheikh Zayed Grand Mosque, Etihad Towers, and Abu Dhabi’s mangroves. Dubai is explicitly a **paper study**, demonstrating the chapter transition. The other five Emirates are listed as future chapters. No Tomorrow’s Earth Expo integration is included.
+A standalone React / Three.js / React Three Fiber / Drei papercraft book prototype. The book starts **closed** and stays closed until deliberately dragged. Opening, paper engineering, and closing are a continuous, reversible interaction. There is no opening timeline, click-to-open button, automatic completion, spring, or scale-based landmark reveal.
 
-## Run locally
+## Run
 
-Use Node.js 22.12+ (validated with Node 24.19) and npm.
+Node.js 22.12+ and npm (validated using Node 24.19):
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open the address Vite prints (normally port 5173). For a production build:
+Vite listens on all interfaces on port 5173 by default. Use a locally reachable host address or an environment-supported port forward. No external hosted preview is created. For a static production build:
 
 ```sh
 npm run build
 npm run preview
 ```
 
-The application is static, requires no API keys or services, and bundles fonts locally. It makes no external requests at runtime. Use a local web server rather than opening `index.html` from disk. The 3D renderer loads separately from the accessible page content.
+No API keys or backend are required. Fonts and paper artwork are local; runtime rendering makes no external requests.
 
-## Explore
+## Interact
 
-- The hardcover opens automatically, the pages settle, and the three papercraft assemblies rise in sequence.
-- Drag to orbit; scroll or pinch to zoom. The camera is constrained to keep the book legible.
-- Click a 3D landmark or use its accessible story card below the book. Cards work with Tab and Enter/Space.
-- Use the next/previous arrows to turn between Abu Dhabi and the Dubai study.
-- The book control closes/reopens it; the circular arrow replays the opening.
-- “The collection” lists all seven chapters. “Behind the folds” explains the interaction.
-- Experience settings offer reduced motion and lighter rendering. Device reduced-motion preferences are respected automatically.
-- Escape closes dialogs and focus returns to the previous control.
+- **Hold the front cover and drag left** to open. Stickers are part of the cover and are raycastable too.
+- **Drag right to close**, including reversing within the same gesture.
+- **Release anywhere to pause** at exactly the current opening angle. Moving off the cover continues the captured drag.
+- Once open, hold the inside left page / outer binding edge to close it again.
+- Mouse, pen, and touch use the same pointer controller. Pointer cancellation and window blur end the gesture without changing the held angle.
+- For keyboard access, focus the opening meter and press Arrow Right/Up to open, Left/Down to close; Home closes and End opens. Clicking the meter only focuses it.
+- The background can orbit/zoom the camera only when fully open. Cover dragging takes priority and locks camera controls.
+- Landmark raycasting and story cards activate above 94% opening when no drag is active.
+- Close the book to change chapters. Abu Dhabi is the main scene; Dubai is a simpler folding study. The other five chapters remain future content.
 
-## Structure
+Chapter switching deliberately exchanges the **flat chapter insert while closed**. The former automatic page-turn animation has been removed: it could independently collapse landmarks while the book angle stayed open. A separate manual chapter-leaf mechanism is future work; this revision prioritizes the requested cover-driven system and preserves chapter navigation.
+
+## One source of motion
+
+`bookOpenProgress` lives in `App.jsx` and is initialized to zero. It changes only through pointer displacement or explicit keyboard adjustment. All book and mechanism transforms are pure functions of that value. There are no independent landmark animation clocks or transform scales.
 
 ```text
 src/
-  App.jsx                     Editorial shell, accessible selection, dialogs, navigation
-  styles.css                  Responsive layout and typography
-  hooks/usePreferences.js     Reduced-motion and WebGL detection
-  data/chapters.js             Chapter content, scene placements, landmark stories
-  book/Book.jsx               Hardcover, spine, pages, page-turn leaf, model registry
-  book/materials.js           Locally generated paper grain and cover artwork
-  book/Scene.jsx              Lighting, camera, canvas, chapter playback
-  animation/bookTimeline.js   Reusable opening, folding, closing, and page-turn timelines
-  landmarks/Paper.jsx         Shared cardstock primitives, gussets, interaction wrapper
-  landmarks/Mosque.jsx        Domes, four minarets, solid arched colonnades
-  landmarks/Towers.jsx        Five creased towers and Dubai study
-  landmarks/Mangroves.jsx     Extruded water layers and layered tree canopies
+  App.jsx                         Shared progress, editorial UI, chapters, accessible stories
+  book/
+    BookController.jsx            Raycast start, pointer capture, release/cancellation
+    Book.jsx                      Book assembly; moving/fixed pages; chapter mounts
+    BookCover.jsx                 Thick matte hardcover and edge liner
+    CoverStickers.jsx             Seven extruded, irregular die-cut illustrated stickers
+    BookPages.jsx                 Layered cardstock, paper grain, gutter seams
+    BookSpine.jsx                 Spine hinge derived from opening angle
+    AbuDhabiChapter.jsx           Reusable foldable model registry and placements
+    Scene.jsx                     Lighting, demand rendering, restrained camera
+    materials.js                  Local deterministic paper/printed cover textures
+  mechanisms/
+    kinematics.js                 Pure fixed-length fold and hinge calculations
+    PopUpMechanism.jsx            V-fold, four-bar parallel fold, tube and panel primitives
+  landmarks/
+    FoldableLandmark.jsx          Mosque, towers, mangroves and Dubai folding study
+    Paper.jsx                     Shared rough cardstock materials and solids
+  data/chapters.js                 Content, page sides, placements, model IDs
+  hooks/usePreferences.js         Device motion and WebGL support
 ```
 
-Landmarks are actual 3D meshes; there are no image billboards or remote models. The book uses a hinged hard cover, nine visible page layers on each side, textured paper surfaces, a rounded spine, gutter creases, and a ribbon. The page-turn system folds away the current assemblies, turns a double-sided cardstock leaf around the binding, swaps chapter data at the midpoint, and unfolds the new scene. Procedural popup assemblies use articulated root rotation and vertical expansion; this is a visual paper-engineering prototype rather than a physical paper simulation. Production assets can supply true scored hinge rigs.
+### Constrained V-fold
 
-## Add a chapter
+Two rigid triangular paper wings share a spine-origin-to-ridge edge. Their two base creases remain in the moving and fixed page planes. The creases make 30° with the binding and each wing's fixed internal angle is 60°. `solveVFold` computes the ridge as the intersection of the two fixed-angle constraints and the fixed-length sphere.
 
-1. Add its stories to `landmarks` in `src/data/chapters.js`.
-2. Give the chapter an available flag, landmark IDs, and a `scene` list of `{ model, position }` records.
-3. Register a procedural component in `book/Book.jsx`, or provide an `asset` URL for an existing model ID as described below.
-4. Navigation automatically includes chapters marked `available`; keep unfinished chapters unavailable.
+At closure the ridge lies flat along +X between the pages; as the pages separate it rises into 3D. Both wings retain **all five edge lengths**, including at 35%, 50%, 60%, and 85%. The visible supporting V-folds are mounted at the binding. A 0.16-unit closed-page cavity accommodates the folded cardstock. Fixed-width accordion glue bridges connect the V-fold creases to the offset moving leaf, preserving both tab lengths across the spine gap. A unit test validates the constraints across 1,001 opening positions. These are kinematic paper wings, not vertically scaled triangles.
 
-Geometry, chapter content, timeline orchestration, and selection are separate. Landmark IDs link the 3D interaction and accessible story cards. The number of popup animation slots is derived from chapter data.
+### Landmark mechanisms
 
-## Replace procedural models with Blender GLB assets
+- **Mosque:** cut-paper arched facades and minarets rotate around scored base hinges. Two equal-height wall hinges form a four-bar parallel fold carrying a roof that stays parallel to the page. Layered onion-shaped dome lamellae fold flat and fan into volume. This is an intentionally simpler cut-and-fold architectural construction, not the former solid lathe-domed model.
+- **Towers:** each tower is a four-panel tube. Its cross-section changes from a flat parallelogram to a rectangle through fixed-length side hinges. The whole panel assembly also rotates about a page-mounted base crease. Tower panels keep their full dimensions throughout.
+- **Mangroves:** tree trunks and canopy lamellae rotate from page-flat positions and fan around shared scored hinges. The water is a thin overlapping shore stack whose small crease angles track the same progress.
+- **Hardcover:** the front leaf rotates by `π × (progress − 1)`. Cover clearance and the split spine are derived from that same angle. The exterior sticker group is a rigid child of the front cover.
 
-Store self-contained `.glb` files under `public/models/`. In Blender:
+The two binding V-folds are exact constrained mechanisms. The landmark models are simplified articulated paper studies driven by the book angle; they are **not a full material, contact, or fabrication simulation**. This project does not claim a physically buildable linkage network for every architectural detail. Further production paper engineering should explicitly connect and collision-test any added folds rather than hide them behind a vertical reveal. No original reference video was supplied with this revision, so no frame-for-frame matching is claimed.
 
-1. Work in meters; export Y-up glTF. Apply scale and rotation. Place the landmark’s origin at the **center of its paper base**, on the ground plane. The book lies in X/Z and height is +Y after export.
-2. Use real thickness (roughly 0.015–0.04 scene units), scored folds, beveled cardstock edges, and separated paper layers. Model architecture as folded paper rather than a realistic building. Keep paper double-sided where necessary; use solid geometry for visible edges.
-3. Use warm off-white, desaturated blue-grey, and muted green roughness-1 materials. Avoid metalness, clearcoat, transmission, baked glossy highlights, or a floor in the asset. Pack textures into the GLB; prefer 1K texture maps and a shared material palette.
-4. Target 10–25k triangles per landmark and a small number of materials. Check desktop and mobile before increasing detail. Author LOD variants if needed.
-5. Suggested local footprints: mosque 3.1 × 2.24 units, towers 2.05 × 1.6, mangroves 2.7 × 1.6. Keep maximum height around 3 units. Page dimensions are approximately 4.3 × 5.5 units per side.
-6. Export glTF 2.0 / GLB with selected objects. The included loader needs no external Draco or KTX decoder; use ordinary glTF geometry/textures initially.
+## Cover artwork
 
-Change the scene record, retaining the model ID, placement, and story:
+The outside front cover reads **THE SEVEN EMIRATES** and **A Sustainability Adventure**. It carries seven matte, raised paper stickers: UAE flag, Burj Khalifa, Grand Mosque, Ras Al Khaimah mountains, mangrove, Earth, and EXPLORE UAE stamp. Each sticker has irregular extruded edges, a local printed texture, thickness, and contact shadows. They remain on the exterior throughout the fold. No remote images or floating decoration are used.
 
-```js
-{ model: 'mosque', position: [-2.17, 0.1, -0.3],
-  asset: '/models/abu-dhabi-mosque.glb', assetScale: 1,
-  assetOffset: [0, 0, 0] }
-```
+## Add chapters / production Blender GLBs
 
-The included `Asset` adapter uses Drei `useGLTF`, clones the scene, enables shadows, and keeps the same selection and animation wrapper. Test assets with `npm run dev`; a missing or invalid GLB triggers the accessible paper-edition fallback. Material properties should be authored in Blender. No actual production GLB is included.
+Chapter scene records specify `model`, `side` (`left` or `right`), and page-local `position`. Register the corresponding folding component in `AbuDhabiChapter.jsx`, then enable its chapter data. Navigation automatically includes available chapters.
 
-For production paper engineering, put each scored fold on a named hinge/pivot in Blender and export an `Unfold` animation. Extend `Asset` with Drei `useAnimations`; advance its action from the shared GSAP timeline rather than playing an independent animation. Keep the base pivot fixed and coordinate hinge rotations with page angle. Retain the reduced-motion endpoint and the procedural story controls. Validate contact/shadow continuity at closed, midpoint, and fully open poses.
+**Do not replace a folding landmark with one rigid GLB and scale it into view.** The previous static GLB adapter was removed because it could not fold mechanically.
 
-## Performance and accessibility
+For production Blender assets:
 
-- Normal mode caps DPR at 1.65; lighter mode uses DPR 1, a 1024 shadow map, no PCSS soft-shadow shader, and no antialiasing.
-- Low-memory/four-core devices default to lighter rendering when the browser exposes those hints.
-- Models use small procedural geometries, shared texture caches, local fonts, and no postprocessing or continuous auto-rotation.
-- Rendering pauses when the canvas is idle; orbit controls and GSAP timelines request frames during changes.
-- Reduced motion takes each sequence directly to its final state; it removes the cinematic camera drift.
-- WebGL initialization failures, context loss, or renderer errors show a static paper-book illustration. Stories and chapter navigation remain usable.
-- Dialogs use native modal focus trapping; all landmark stories are available without interacting with the canvas. The canvas is supplementary.
+1. Model actual thin cardstock panels (roughly 0.008–0.02 scene units), separated at scored folds. Use roughness 1, metalness 0, desaturated paper colors, and real exposed edges. Omit a ground plane and glossy architectural materials.
+2. Use page-local X/Z as the base plane and +Y as height after glTF export. Put each panel's origin exactly on its physical fold line. Apply object scale/rotation before assigning hinge parents.
+3. Match the existing footprints: left mosque about 3.1 × 2.35 units; right tower assembly about 1.65 × 3; mangrove shore about 2.4 × 1.3. A page is about 4.3 × 5.5 units. All flat panels must fit the pages and cover envelope at progress zero.
+4. Export a named hinge hierarchy, e.g. `Mosque_Base`, `Mosque_FrontCrease`, `Dome_Petal_01`, `Tower_01_Face_A` through `_D`, and `Tree_01_TrunkFold`. Keep pivots and material assignments in the GLB.
+5. Load using Drei `useGLTF('/models/abu-dhabi.glb')`; clone the hierarchy, enable shadows, and bind named hinge nodes to the same `bookOpenProgress` calculations. Keep the existing page-side group and selection wrapper.
+6. Alternatively, author an `Unfold` animation in Blender. Use `useAnimations` to pause its action and **scrub** `action.time = progress × clip.duration` / `mixer.update(0)` for both opening and reversal. Never play the clip on an independent timer. Use linear angle keys or bake a constrained kinematic solution; avoid interpolated scale tracks.
+7. Inspect closed, 10%, 35%, 50%, 60%, 85%, and open poses. Check fixed edge lengths, connection points, thickness clearance, and cover/page collision. A visual GLB animation alone does not prove paper manufacturability.
+8. Target 10–25k triangles per landmark with shared materials and packed 1K textures. Start with standard self-contained GLB; add local Draco/KTX decoders only if necessary.
 
-## Verification
+No production GLB or original reference video is included.
+
+## Device support
+
+Demand rendering stops when the book is idle. Geometry for rigid panels is retained while only transforms update; the constrained V-fold geometry updates with its computed vertices. Desktop DPR is capped at 1.65. Lighter rendering uses DPR 1, smaller shadow maps, and no soft-shadow shader. Four-core/low-memory devices select it by default when browser hints are available.
+
+There is no autonomous camera drift or motion to complete. Reduced-motion preferences preserve direct manual control. WebGL failure/context loss switches to a static paper edition, retaining chapter navigation and stories. Dialog focus and all stories remain keyboard accessible.
+
+## Validation
 
 ```sh
-# Install Chromium once, or use a system Chromium:
-npx playwright install chromium
-npm test
-# Optional browser location:
-CHROMIUM_PATH=/path/to/chromium npm test
+npm test                  # Kinematics plus actual Chromium interaction tests
+npm run test:mechanics    # Fixed-length and reversibility checks only
 ```
 
-The tests exercise actual WebGL rendering with Chromium, opening, selection, page turns in both directions, close/reopen/replay, a mobile viewport, reduced motion, lighter rendering, keyboard selection, and the no-WebGL fallback. Screenshots are generated under `artifacts/`.
+Playwright uses `/usr/bin/chromium` when present. Otherwise run `npx playwright install chromium` or set `CHROMIUM_PATH` to an installed Chromium. Tests run real WebGL with software rendering in CI and dispatch native Chromium touch events for mobile coverage.
 
-This repository is a visual prototype. Papercraft landmarks are recognizable procedural interpretations, not architectural surveys. Only Abu Dhabi and the Dubai transition study have scene content. Asset quality and performance on physical student devices should be evaluated before production use.
+Coverage includes no autoplay, no click opening, raycast drag starts, pointer capture outside the cover, partial poses, pause/release, reversal in one gesture, complete closure, repeatability, keyboard control, mobile/touch input, reduced motion, selection gating, closed-book chapter changes, and the no-WebGL fallback. Screenshots at closed/35/50/60/85/100% and mobile poses are saved under `artifacts/`.
+
+This remains a standalone prototype, with no Tomorrow's Earth Expo integration.
