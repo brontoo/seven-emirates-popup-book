@@ -17,7 +17,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.026,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0,
+      "turnProgress": 0,
+      "turnActive": false
     },
     "1": {
       "progress": 1,
@@ -36,7 +40,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.035,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 1,
+      "turnProgress": 0,
+      "turnActive": false
     },
     "0.5": {
       "progress": 0.5,
@@ -55,7 +63,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.02864,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0.5,
+      "turnProgress": 0,
+      "turnActive": false
     }
   },
   "b": {
@@ -76,7 +88,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.021,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0,
+      "turnProgress": 0,
+      "turnActive": false
     },
     "1": {
       "progress": 1,
@@ -95,7 +111,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.031,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 1,
+      "turnProgress": 0,
+      "turnActive": false
     },
     "0.5": {
       "progress": 0.5,
@@ -114,7 +134,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.02385,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0.5,
+      "turnProgress": 0,
+      "turnActive": false
     }
   },
   "c": {
@@ -135,7 +159,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.015,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0,
+      "turnProgress": 0,
+      "turnActive": false
     },
     "1": {
       "progress": 1,
@@ -154,7 +182,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.024,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 1,
+      "turnProgress": 0,
+      "turnActive": false
     },
     "0.5": {
       "progress": 0.5,
@@ -173,7 +205,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.01764,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0.5,
+      "turnProgress": 0,
+      "turnActive": false
     }
   },
   "d": {
@@ -194,7 +230,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.012,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0,
+      "turnProgress": 0,
+      "turnActive": false
     },
     "1": {
       "progress": 1,
@@ -213,7 +253,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.012,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 1,
+      "turnProgress": 0,
+      "turnActive": false
     },
     "0.5": {
       "progress": 0.5,
@@ -232,7 +276,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.012,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0.5,
+      "turnProgress": 0,
+      "turnActive": false
     }
   },
   "e": {
@@ -253,7 +301,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.012,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0,
+      "turnProgress": 0,
+      "turnActive": false
     },
     "1": {
       "progress": 1,
@@ -272,7 +324,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.012,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 1,
+      "turnProgress": 0,
+      "turnActive": false
     },
     "0.05": {
       "progress": 0.05,
@@ -291,7 +347,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.012,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0.05,
+      "turnProgress": 0,
+      "turnActive": false
     },
     "0.1": {
       "progress": 0.1,
@@ -310,7 +370,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.012,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0.1,
+      "turnProgress": 0,
+      "turnActive": false
     },
     "0.25": {
       "progress": 0.25,
@@ -329,7 +393,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.012,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0.25,
+      "turnProgress": 0,
+      "turnActive": false
     },
     "0.5": {
       "progress": 0.5,
@@ -348,7 +416,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.012,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0.5,
+      "turnProgress": 0,
+      "turnActive": false
     },
     "0.75": {
       "progress": 0.75,
@@ -367,7 +439,11 @@
       "pageViolations": 0,
       "coverViolations": 0,
       "minClearance": 0.01029,
-      "failures": {}
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0.75,
+      "turnProgress": 0,
+      "turnActive": false
     }
   }
 }

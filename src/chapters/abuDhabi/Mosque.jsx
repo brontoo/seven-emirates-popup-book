@@ -9,6 +9,7 @@ import {
   Selectable,
   polygon,
   slabShape,
+  cachedSlab,
   archHole,
   palette,
 } from "./Primitives";
@@ -240,7 +241,7 @@ function Minaret({ page, progress }) {
                 rotation={[-beta, 0, 0]}
               >
                 <Panel
-                  shape={slabShape(0.22 - i * 0.035, 0.13, -0.11 + i * 0.0175)}
+                  shape={cachedSlab(0.22 - i * 0.035, 0.13, -0.11 + i * 0.0175)}
                   color={palette.light}
                 />
               </group>

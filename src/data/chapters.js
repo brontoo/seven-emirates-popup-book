@@ -32,6 +32,50 @@ export const landmarks = {
     fact: "Palm-lined gardens · The Arabian Gulf",
     color: "#aab99b",
   },
+  museum: {
+    id: "museum",
+    label: "Museum of the Future",
+    short: "Museum of the Future",
+    category: "DESIGN · TOMORROW",
+    number: "01",
+    description:
+      "An oval window into what comes next. Layered ivory cardstock reimagines the museum’s sweeping ring, open centre, and calligraphic surface as a folding paper sculpture.",
+    fact: "Opened in 2022 · Sheikh Zayed Road",
+    color: "#e9ddc2",
+  },
+  "burj-khalifa": {
+    id: "burj-khalifa",
+    label: "Burj Khalifa",
+    short: "Burj Khalifa",
+    category: "ARCHITECTURE · SKYLINE",
+    number: "02",
+    description:
+      "A slender stepped silhouette anchors Dubai’s skyline. Its setbacks and needle-like spire are cut into blue paper blades that fold flat at the binding.",
+    fact: "828 metres · Downtown Dubai",
+    color: "#a5bbc8",
+  },
+  "emirates-towers": {
+    id: "emirates-towers",
+    label: "Emirates Towers",
+    short: "Emirates Towers",
+    category: "ARCHITECTURE · CITY",
+    number: "03",
+    description:
+      "Two sharply angled crowns frame the city from the left of the page. Their blue-grey façades, cut-out windows, and scored sides share the same paper language as Abu Dhabi.",
+    fact: "Twin towers · Sheikh Zayed Road",
+    color: "#b0c2cc",
+  },
+  metro: {
+    id: "metro",
+    label: "Dubai Metro",
+    short: "Dubai Metro",
+    category: "MOBILITY · CONNECTION",
+    number: "04",
+    description:
+      "A cream paper viaduct curves through the right-hand skyline. Equal-length hinged piers support its elevated track, while a small folding carriage rests above the rail.",
+    fact: "Opened in 2009 · Connected across the city",
+    color: "#c6cbbd",
+  },
 };
 export const chapters = [
   {
@@ -42,9 +86,16 @@ export const chapters = [
     index: "01",
     landmarks: ["mosque", "towers", "mangroves"],
     available: true,
-    scene: [],
   },
-  { id: "dubai", title: "Dubai", index: "02", available: false },
+  {
+    id: "dubai",
+    title: "Dubai",
+    index: "02",
+    arabic: "دبي",
+    subtitle: "A city looking ahead",
+    landmarks: ["museum", "burj-khalifa", "emirates-towers", "metro"],
+    available: true,
+  },
   { id: "sharjah", title: "Sharjah", index: "03", available: false },
   { id: "ajman", title: "Ajman", index: "04", available: false },
   {

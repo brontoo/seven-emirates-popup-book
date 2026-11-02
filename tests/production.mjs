@@ -78,9 +78,43 @@ try {
   await expect(
     page.getByRole("heading", { name: "Sheikh Zayed Grand Mosque" }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Next chapter", exact: true }).click();
+  await expect(page.locator(".experience")).toHaveAttribute(
+    "data-page-turn-state",
+    "turning",
+  );
+  await expect(page.locator(".experience")).toHaveAttribute(
+    "data-page-turn-state",
+    "idle",
+    { timeout: 25000 },
+  );
+  await expect(page.locator(".experience")).toHaveAttribute(
+    "data-chapter-id",
+    "dubai",
+  );
+  await page.screenshot({
+    path: "artifacts/dubai/production.png",
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: /Museum of the Future/ }).click();
+  await expect(page.locator(".landmark-story h3")).toHaveText(
+    "Museum of the Future",
+  );
+  await page
+    .getByRole("button", { name: "Previous chapter", exact: true })
+    .click();
+  await expect(page.locator(".experience")).toHaveAttribute(
+    "data-page-turn-state",
+    "idle",
+    { timeout: 25000 },
+  );
+  await expect(page.locator(".experience")).toHaveAttribute(
+    "data-chapter-id",
+    "abu-dhabi",
+  );
   assert.deepEqual(errors, []);
   console.log(
-    "Production: complete Abu Dhabi scene renders; inspector and stage override are excluded.",
+    "Production: Abu Dhabi and Dubai turn in both directions; inspector and stage override are excluded.",
   );
 } finally {
   if (browser) await browser.close();

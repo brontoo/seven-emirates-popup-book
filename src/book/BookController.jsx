@@ -3,7 +3,12 @@ import { useThree } from "@react-three/fiber";
 import { clamp01 } from "../mechanisms/kinematics";
 
 /** Raycast starts the gesture. Pointer capture + a window fallback retain it. */
-export function useBookController({ progress, onProgress, onDragging }) {
+export function useBookController({
+  progress,
+  onProgress,
+  onDragging,
+  enabled = true,
+}) {
   const { gl, size } = useThree();
   const drag = useRef(null);
   const latest = useRef({
@@ -51,7 +56,7 @@ export function useBookController({ progress, onProgress, onDragging }) {
   }, [move, end, gl]);
   return {
     onPointerDown: (event) => {
-      if (event.button !== 0 || drag.current) return;
+      if (!enabled || event.button !== 0 || drag.current) return;
       event.stopPropagation();
       drag.current = {
         id: event.pointerId,

@@ -7,6 +7,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { usePageTurnController } from "./book/PageTurnController";
+import { pageTurnPose } from "./book/pageTurn";
 import { chapters, landmarks } from "./data/chapters";
 import { supportsWebGL, useMedia } from "./hooks/usePreferences";
 const MechanismInspector = import.meta.env.DEV
@@ -89,12 +91,27 @@ function LandmarkSketch({ type }) {
       fill="none"
       aria-hidden="true"
     >
-      {type === "mosque" ? (
+      {type === "museum" ? (
+        <g stroke="currentColor" strokeWidth="1.1">
+          <ellipse cx="60" cy="36" rx="43" ry="24" />
+          <ellipse cx="60" cy="36" rx="27" ry="12" />
+          <path d="M20 61h80l8 8H12l8-8m14-35 7-7m43 34 6-7" />
+        </g>
+      ) : type === "metro" ? (
+        <g stroke="currentColor" strokeWidth="1.1">
+          <path d="M8 50q46-18 104 8M8 55q46-18 104 8M22 50v19m30-24v24m30-20v20m24-10v10" />
+          <path d="M39 40V26h35l8 18H39Zm5-10h6v8h-6m10-8h7v8h-7m11-8h7l3 8H65" />
+        </g>
+      ) : type === "burj-khalifa" ? (
+        <g stroke="currentColor" strokeWidth="1.1">
+          <path d="M20 69h80M46 68V47h5V30h4V17h4L61 3l2 14h3v13h4v17h5v21M61 18v48m-9-20h18m-14-15h10" />
+        </g>
+      ) : type === "mosque" ? (
         <g stroke="currentColor" strokeWidth="1.1">
           <path d="M10 65h101M19 64V33h4v31m74 0V33h4v31M17 33l4-9 4 9m70 0 4-9 4 9M33 64V43h54v21M47 43v-4c-8-10 9-17 13-25 4 8 21 15 13 25v4M60 14V8M45 43h30M33 51h54M52 64V54q8-13 16 0v10M39 64v-8m42 8v-8" />
           <path d="M14 65V42h15v23m62 0V42h15v23M30 42q-10-19-17 0m94 0q-10-19-17 0" />
         </g>
-      ) : type === "towers" || type === "burj" ? (
+      ) : type === "towers" || type === "burj" || type === "emirates-towers" ? (
         <g stroke="currentColor" strokeWidth="1.1">
           <path d="M12 67h97M22 66V31l15-6v41M44 66V12l16-4-3 58M65 66V24l17-7-4 49M87 66V36l12-4-3 34M26 33v29M49 17v45M70 28v34M36 43l-13 3m35-17-14 3m37 6-15 4m-9 5-13 3" />
         </g>
@@ -191,7 +208,16 @@ export default function App() {
   const [bookOpenProgress, setBookOpenProgress] = useState(0),
     [dragging, setDragging] = useState(false);
   const [modal, setModal] = useState(null);
-  const active = chapters[chapter];
+  const clearSelection = useCallback(() => setSelected(null), []);
+  const pagination = usePageTurnController({
+    chapter,
+    onChapter: setChapter,
+    reduced: reduced || systemReduced,
+    onStart: clearSelection,
+  });
+  const turn = pagination.turn;
+  const presentedChapter = pageTurnPose(turn, chapter).chapter;
+  const active = chapters[presentedChapter];
   const available = chapters
     .map((c, i) => (c.available ? i : null))
     .filter((i) => i !== null);
@@ -199,12 +225,14 @@ export default function App() {
     next = available.find((i) => i > chapter);
   const closed = bookOpenProgress < 0.001,
     fullyOpen = bookOpenProgress > 0.98;
-  const canInteract = !webgl || (bookOpenProgress > 0.94 && !dragging);
-  const canChangeChapter = !webgl || (closed && !dragging);
+  const canInteract =
+    !webgl || (bookOpenProgress > 0.94 && !dragging && !turn.active);
+  const canChangeChapter = !webgl || (fullyOpen && !dragging && !turn.active);
   const onFailure = useCallback(() => {
     setWebgl(false);
     setDragging(false);
-  }, []);
+    pagination.cancel();
+  }, [pagination.cancel]);
   const onProgress = useCallback((value) => {
     setBookOpenProgress(value);
     if (value < 0.94) setSelected(null);
@@ -218,9 +246,14 @@ export default function App() {
   function changeChapter(target) {
     if (!canChangeChapter || target === undefined) return;
     setSelected(null);
-    setChapter(target);
+    if (!webgl) {
+      setChapter(target);
+      return;
+    }
+    pagination.request(target);
   }
   function openingKey(event) {
+    if (turn.active) return;
     const changes = {
       ArrowRight: 0.05,
       ArrowUp: 0.05,
@@ -288,6 +321,15 @@ export default function App() {
       {import.meta.env.DEV && debug.enabled && (
         <Suspense fallback={null}>
           <MechanismInspector
+            chapter={presentedChapter}
+            onChapter={pagination.choose}
+            turn={turn}
+            onTurn={pagination.scrub}
+            onReset={() => {
+              pagination.cancel();
+              setBookOpenProgress(0);
+              setSelected(null);
+            }}
             progress={bookOpenProgress}
             onProgress={onProgress}
             debug={debug}
@@ -303,6 +345,9 @@ export default function App() {
           data-book-progress={bookOpenProgress.toFixed(4)}
           data-scene-ready={sceneReady}
           data-dragging={dragging}
+          data-chapter-id={active.id}
+          data-page-turn-progress={turn.progress.toFixed(4)}
+          data-page-turn-state={turn.active ? "turning" : "idle"}
         >
           <div className="scene-wrap">
             {webgl ? (
@@ -325,6 +370,7 @@ export default function App() {
                     onSceneReady={onSceneReady}
                     debug={debug}
                     onReport={onReport}
+                    turn={turn}
                   />
                 </Suspense>
               </SceneBoundary>
@@ -368,13 +414,15 @@ export default function App() {
             <span aria-live="polite">
               {!webgl
                 ? "THE PAPER EDITION"
-                : selected
-                  ? landmarks[selected].label.toUpperCase()
-                  : closed
-                    ? "DRAG THE FRONT COVER LEFT TO OPEN"
-                    : fullyOpen
-                      ? "DRAG THE LEFT PAGE RIGHT TO CLOSE"
-                      : "YOUR HAND. EVERY FOLD."}
+                : turn.active
+                  ? `TURNING TO ${chapters[turn.to].title.toUpperCase()}`
+                  : selected
+                    ? landmarks[selected].label.toUpperCase()
+                    : closed
+                      ? "DRAG THE FRONT COVER LEFT TO OPEN"
+                      : fullyOpen
+                        ? "DRAG THE LEFT PAGE RIGHT TO CLOSE"
+                        : "YOUR HAND. EVERY FOLD."}
             </span>
             {selected && <a href="#landmarks">Read the story ↓</a>}
           </div>
@@ -383,6 +431,7 @@ export default function App() {
               <div
                 role="slider"
                 aria-label="Book opening"
+                aria-disabled={turn.active}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={Math.round(bookOpenProgress * 100)}
@@ -415,15 +464,13 @@ export default function App() {
               <span className="chapter-number">{active.index}</span>
               <div>
                 <span className="eyebrow">
-                  {active.study
-                    ? "THE NEXT CHAPTER · PAPER STUDY"
-                    : "THE FIRST CHAPTER"}
+                  {active.index === "01"
+                    ? "THE FIRST CHAPTER"
+                    : `CHAPTER ${active.index}`}
                 </span>
                 <h2>
                   {active.title}
-                  <span className="chapter-subtitle">
-                    {active.subtitle}
-                  </span>
+                  <span className="chapter-subtitle">{active.subtitle}</span>
                 </h2>
               </div>
             </div>
@@ -470,7 +517,9 @@ export default function App() {
                 : "Unfold the book to explore its landmarks"}
             </p>
           </div>
-          <div className={`landmark-grid ${active.study ? "study-grid" : ""}`}>
+          <div
+            className={`landmark-grid ${active.landmarks.length === 4 ? "four-landmarks" : ""}`}
+          >
             {active.landmarks.map((id) => {
               const item = landmarks[id];
               return (
@@ -536,23 +585,25 @@ export default function App() {
       {modal === "chapters" && (
         <Modal title="Seven Emirates. One book." onClose={() => setModal(null)}>
           <p className="modal-intro">
-            This edition explores Abu Dhabi. Six more Emirates are waiting to be
-            crafted.
+            Explore Abu Dhabi and turn the page to Dubai. Five more Emirates are
+            waiting to be crafted.
           </p>
           <div className="chapter-list">
             {chapters.map((c, i) => (
               <button
                 key={c.id}
-                disabled={!c.available || (!canChangeChapter && i !== chapter)}
+                disabled={
+                  !c.available || (!canChangeChapter && i !== presentedChapter)
+                }
                 onClick={() => {
                   setModal(null);
-                  if (i !== chapter) changeChapter(i);
+                  if (i !== presentedChapter) changeChapter(i);
                 }}
               >
                 <span>{c.index}</span>
                 <strong>{c.title}</strong>
                 <small>
-                  {i === chapter
+                  {i === presentedChapter
                     ? "CURRENT CHAPTER"
                     : c.study
                       ? "PAPER STUDY"
@@ -587,8 +638,8 @@ export default function App() {
           </p>
           <p className="muted">
             This standalone prototype uses procedural paper models. Every paper
-            hinge follows your hand. This edition focuses exclusively on Abu
-            Dhabi; the chapter system is ready for future Emirates.
+            hinge follows your hand. Abu Dhabi and Dubai share the same book.
+            When fully open, use Next or Previous to turn the inner page.
           </p>
         </Modal>
       )}

@@ -2,7 +2,9 @@ import { chapters } from "../data/chapters";
 import BookCover from "./BookCover";
 import BookPages from "./BookPages";
 import BookSpine from "./BookSpine";
-import ChapterLandmarks from "./AbuDhabiChapter";
+import ChapterLandmarks from "./ChapterSpread";
+import TurningPage from "./TurningPage";
+import { pageTurnPose } from "./pageTurn";
 import { useBookController } from "./BookController";
 import { coverAngle, leafOffset } from "../mechanisms/kinematics";
 import { VFold } from "../mechanisms/PopUpMechanism";
@@ -17,10 +19,18 @@ export default function Book({
   onSelect,
   lowPower,
   debug = { stage: "e" },
+  turn = { active: false, progress: 0 },
 }) {
-  const handlers = useBookController({ progress, onProgress, onDragging });
-  const active = chapters[chapter];
-  const enabled = progress > 0.94 && !dragging;
+  const handlers = useBookController({
+    progress,
+    onProgress,
+    onDragging,
+    enabled: !turn.active,
+  });
+  const pose = pageTurnPose(turn, chapter);
+  const active = chapters[pose.chapter];
+  const unfold = progress * pose.unfold;
+  const enabled = progress > 0.94 && !dragging && !turn.active;
   return (
     <group position={[-2.18 * (1 - progress), 0.04, 0]} name="mechanical-book">
       <BookSpine progress={progress} />
@@ -37,14 +47,20 @@ export default function Book({
             progress={progress}
           />
         </group>
-        <ChapterLandmarks
-          page="left"
-          lowPower={lowPower}
-          stage={debug.stage}
-          progress={progress}
-          enabled={enabled}
-          onSelect={onSelect}
-        />
+        <group
+          rotation={[0, 0, pose.leftAngle]}
+          position={[0, pose.movingSide === "left" ? 0.004 : 0, 0]}
+        >
+          <ChapterLandmarks
+            chapter={pose.chapter}
+            page="left"
+            lowPower={lowPower}
+            stage={debug.stage}
+            progress={unfold}
+            enabled={enabled}
+            onSelect={onSelect}
+          />
+        </group>
         {/* A visible fore-edge grip remains raycastable from the inside at full opening. */}
         <group {...handlers}>
           <Block
@@ -62,22 +78,29 @@ export default function Book({
         label={`${active.index}    —    ${active.title.toUpperCase()}`}
         progress={progress}
       />
-      <ChapterLandmarks
-        page="right"
-        lowPower={lowPower}
-        stage={debug.stage}
-        progress={progress}
-        enabled={enabled}
-        onSelect={onSelect}
-      />
+      <group
+        rotation={[0, 0, pose.rightAngle]}
+        position={[0, pose.movingSide === "right" ? 0.004 : 0, 0]}
+      >
+        <ChapterLandmarks
+          chapter={pose.chapter}
+          page="right"
+          lowPower={lowPower}
+          stage={debug.stage}
+          progress={unfold}
+          enabled={enabled}
+          onSelect={onSelect}
+        />
+      </group>
+      <TurningPage turn={turn} angle={pose.leafAngle} />
       <VFold
-        progress={progress}
+        progress={unfold}
         position={[0, 0.018, -2.25]}
         base={0.26}
         ridge={0.3}
       />
       <VFold
-        progress={progress}
+        progress={unfold}
         position={[0, 0.021, 1.65]}
         base={0.25}
         ridge={0.2}

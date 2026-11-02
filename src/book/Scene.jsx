@@ -2,9 +2,10 @@ import { Suspense, useEffect, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, SoftShadows } from "@react-three/drei";
 import Book from "./Book";
+import { pageTurnPose } from "./pageTurn";
 import { DebugContext } from "../chapters/abuDhabi/Primitives";
 import { auditBook } from "../dev/audit";
-function CameraRig({ progress, dragging }) {
+function CameraRig({ progress, dragging, turn }) {
   const { camera, size } = useThree();
   useEffect(() => {
     camera.position.set(0.18, 7.4, 14.2);
@@ -15,13 +16,14 @@ function CameraRig({ progress, dragging }) {
       size.width < 650
         ? 40 + 9 * progress
         : (size.width < 1100 ? 34 : 29) + 7 * Math.sin(Math.PI * progress);
+    if (turn.active) camera.fov += 7 * Math.sin(Math.PI * turn.progress);
     camera.updateProjectionMatrix();
-  }, [camera, size, progress]);
+  }, [camera, size, progress, turn.active, turn.progress]);
   return (
     <OrbitControls
       makeDefault
       target={[0, 0.85, 0]}
-      enabled={!dragging}
+      enabled={!dragging && !turn.active}
       enableRotate={progress > 0.98}
       enablePan={false}
       enableZoom={progress > 0.98}
@@ -45,17 +47,31 @@ function World({ lowPower, onSceneReady, onReport, debug, ...props }) {
     const id = setTimeout(() => {
       const book = scene.getObjectByName("mechanical-book");
       if (book)
-        onReport(
-          auditBook(
+        onReport({
+          ...auditBook(
             book,
             props.progress,
             camera,
             gl.domElement.getBoundingClientRect(),
           ),
-        );
+          chapter: pageTurnPose(props.turn, props.chapter).chapter,
+          unfold:
+            props.progress * pageTurnPose(props.turn, props.chapter).unfold,
+          turnProgress: props.turn.progress,
+          turnActive: props.turn.active,
+        });
     }, 180);
     return () => clearTimeout(id);
-  }, [scene, camera, gl, props.progress, debug, onReport]);
+  }, [
+    scene,
+    camera,
+    gl,
+    props.progress,
+    props.turn,
+    props.chapter,
+    debug,
+    onReport,
+  ]);
   const announced = useRef(false);
   useFrame(() => {
     if (!announced.current) {
@@ -100,7 +116,11 @@ function World({ lowPower, onSceneReady, onReport, debug, ...props }) {
         <planeGeometry args={[200, 200]} />
         <shadowMaterial transparent opacity={0.35} />
       </mesh>
-      <CameraRig progress={props.progress} dragging={props.dragging} />
+      <CameraRig
+        progress={props.progress}
+        dragging={props.dragging}
+        turn={props.turn}
+      />
     </>
   );
 }

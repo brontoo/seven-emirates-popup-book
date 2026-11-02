@@ -206,7 +206,7 @@ test("native touch follows the cover in both directions and mobile framing stays
   await context.close();
 });
 
-test("student route hides the inspector, gates selections and exposes only Abu Dhabi", async ({
+test("student route hides the inspector, gates selections and exposes both chapters", async ({
   page,
 }) => {
   await load(page, "");
@@ -234,7 +234,10 @@ test("student route hides the inspector, gates selections and exposes only Abu D
   ).toBeVisible();
   await page.getByRole("button", { name: /The collection/ }).click();
   await expect(
-    page.getByRole("button", { name: /02 Dubai COMING LATER/ }),
+    page.getByRole("button", { name: /02 Dubai EXPLORE/ }),
+  ).toBeEnabled();
+  await expect(
+    page.getByRole("button", { name: /03 Sharjah COMING LATER/ }),
   ).toBeDisabled();
   await page.getByRole("button", { name: "Close dialog" }).click();
   await page.getByRole("slider", { name: "Book opening", exact: true }).focus();

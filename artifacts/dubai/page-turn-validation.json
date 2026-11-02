@@ -1,0 +1,374 @@
+{
+  "0": {
+    "1": {
+      "progress": 1,
+      "grips": {
+        "outside": [
+          377.99498018160347,
+          610.7652376714041
+        ],
+        "inside": [
+          297.4155679283453,
+          579.7123954498861
+        ]
+      },
+      "assemblies": 20,
+      "vertices": 17574,
+      "pageViolations": 0,
+      "coverViolations": 0,
+      "minClearance": 0.012,
+      "failures": {},
+      "chapter": 1,
+      "unfold": 1,
+      "turnProgress": 1,
+      "turnActive": false
+    },
+    "0.1": {
+      "progress": 1,
+      "grips": {
+        "outside": [
+          402.81893631001185,
+          602.7254977811308
+        ],
+        "inside": [
+          328.08826801872823,
+          573.9265826902108
+        ]
+      },
+      "assemblies": 33,
+      "vertices": 66150,
+      "pageViolations": 0,
+      "coverViolations": 0,
+      "minClearance": 0.012,
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0.8,
+      "turnProgress": 0.1,
+      "turnActive": true
+    },
+    "0.25": {
+      "progress": 1,
+      "grips": {
+        "outside": [
+          430.24354197402516,
+          593.8434849790029
+        ],
+        "inside": [
+          361.9743537126457,
+          567.5346267683128
+        ]
+      },
+      "assemblies": 33,
+      "vertices": 66150,
+      "pageViolations": 0,
+      "coverViolations": 0,
+      "minClearance": 0.012,
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0.5,
+      "turnProgress": 0.25,
+      "turnActive": true
+    },
+    "0.49": {
+      "progress": 1,
+      "grips": {
+        "outside": [
+          447.75554859940854,
+          588.1718677115318
+        ],
+        "inside": [
+          383.6123442256278,
+          563.4530375624443
+        ]
+      },
+      "assemblies": 33,
+      "vertices": 66150,
+      "pageViolations": 0,
+      "coverViolations": 0,
+      "minClearance": 0.012,
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0.020000000000000018,
+      "turnProgress": 0.49,
+      "turnActive": true
+    },
+    "0.5": {
+      "progress": 1,
+      "grips": {
+        "outside": [
+          447.7834705359901,
+          588.1628246280609
+        ],
+        "inside": [
+          383.6468448178088,
+          563.4465296917363
+        ]
+      },
+      "assemblies": 20,
+      "vertices": 17574,
+      "pageViolations": 0,
+      "coverViolations": 0,
+      "minClearance": 0.012,
+      "failures": {},
+      "chapter": 1,
+      "unfold": 0,
+      "turnProgress": 0.5,
+      "turnActive": true
+    },
+    "0.51": {
+      "progress": 1,
+      "grips": {
+        "outside": [
+          447.75554859940854,
+          588.1718677115318
+        ],
+        "inside": [
+          383.6123442256278,
+          563.4530375624443
+        ]
+      },
+      "assemblies": 20,
+      "vertices": 17574,
+      "pageViolations": 0,
+      "coverViolations": 0,
+      "minClearance": 0.012,
+      "failures": {},
+      "chapter": 1,
+      "unfold": 0.020000000000000018,
+      "turnProgress": 0.51,
+      "turnActive": true
+    },
+    "0.75": {
+      "progress": 1,
+      "grips": {
+        "outside": [
+          430.24354197402516,
+          593.8434849790029
+        ],
+        "inside": [
+          361.9743537126457,
+          567.5346267683128
+        ]
+      },
+      "assemblies": 20,
+      "vertices": 17574,
+      "pageViolations": 0,
+      "coverViolations": 0,
+      "minClearance": 0.012,
+      "failures": {},
+      "chapter": 1,
+      "unfold": 0.5,
+      "turnProgress": 0.75,
+      "turnActive": true
+    },
+    "0.9": {
+      "progress": 1,
+      "grips": {
+        "outside": [
+          402.81893631001185,
+          602.7254977811308
+        ],
+        "inside": [
+          328.08826801872823,
+          573.9265826902108
+        ]
+      },
+      "assemblies": 20,
+      "vertices": 17574,
+      "pageViolations": 0,
+      "coverViolations": 0,
+      "minClearance": 0.012,
+      "failures": {},
+      "chapter": 1,
+      "unfold": 0.8,
+      "turnProgress": 0.9,
+      "turnActive": true
+    }
+  },
+  "1": {
+    "1": {
+      "progress": 1,
+      "grips": {
+        "outside": [
+          377.99498018160347,
+          610.7652376714041
+        ],
+        "inside": [
+          297.4155679283453,
+          579.7123954498861
+        ]
+      },
+      "assemblies": 33,
+      "vertices": 66150,
+      "pageViolations": 0,
+      "coverViolations": 0,
+      "minClearance": 0.012,
+      "failures": {},
+      "chapter": 0,
+      "unfold": 1,
+      "turnProgress": 1,
+      "turnActive": false
+    },
+    "0.1": {
+      "progress": 1,
+      "grips": {
+        "outside": [
+          402.81893631001185,
+          602.7254977811308
+        ],
+        "inside": [
+          328.08826801872823,
+          573.9265826902108
+        ]
+      },
+      "assemblies": 20,
+      "vertices": 17574,
+      "pageViolations": 0,
+      "coverViolations": 0,
+      "minClearance": 0.012,
+      "failures": {},
+      "chapter": 1,
+      "unfold": 0.8,
+      "turnProgress": 0.1,
+      "turnActive": true
+    },
+    "0.25": {
+      "progress": 1,
+      "grips": {
+        "outside": [
+          430.24354197402516,
+          593.8434849790029
+        ],
+        "inside": [
+          361.9743537126457,
+          567.5346267683128
+        ]
+      },
+      "assemblies": 20,
+      "vertices": 17574,
+      "pageViolations": 0,
+      "coverViolations": 0,
+      "minClearance": 0.012,
+      "failures": {},
+      "chapter": 1,
+      "unfold": 0.5,
+      "turnProgress": 0.25,
+      "turnActive": true
+    },
+    "0.49": {
+      "progress": 1,
+      "grips": {
+        "outside": [
+          447.75554859940854,
+          588.1718677115318
+        ],
+        "inside": [
+          383.6123442256278,
+          563.4530375624443
+        ]
+      },
+      "assemblies": 20,
+      "vertices": 17574,
+      "pageViolations": 0,
+      "coverViolations": 0,
+      "minClearance": 0.012,
+      "failures": {},
+      "chapter": 1,
+      "unfold": 0.020000000000000018,
+      "turnProgress": 0.49,
+      "turnActive": true
+    },
+    "0.5": {
+      "progress": 1,
+      "grips": {
+        "outside": [
+          447.7834705359901,
+          588.1628246280609
+        ],
+        "inside": [
+          383.6468448178088,
+          563.4465296917363
+        ]
+      },
+      "assemblies": 33,
+      "vertices": 66150,
+      "pageViolations": 0,
+      "coverViolations": 0,
+      "minClearance": 0.012,
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0,
+      "turnProgress": 0.5,
+      "turnActive": true
+    },
+    "0.51": {
+      "progress": 1,
+      "grips": {
+        "outside": [
+          447.75554859940854,
+          588.1718677115318
+        ],
+        "inside": [
+          383.6123442256278,
+          563.4530375624443
+        ]
+      },
+      "assemblies": 33,
+      "vertices": 66150,
+      "pageViolations": 0,
+      "coverViolations": 0,
+      "minClearance": 0.012,
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0.020000000000000018,
+      "turnProgress": 0.51,
+      "turnActive": true
+    },
+    "0.75": {
+      "progress": 1,
+      "grips": {
+        "outside": [
+          430.24354197402516,
+          593.8434849790029
+        ],
+        "inside": [
+          361.9743537126457,
+          567.5346267683128
+        ]
+      },
+      "assemblies": 33,
+      "vertices": 66150,
+      "pageViolations": 0,
+      "coverViolations": 0,
+      "minClearance": 0.012,
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0.5,
+      "turnProgress": 0.75,
+      "turnActive": true
+    },
+    "0.9": {
+      "progress": 1,
+      "grips": {
+        "outside": [
+          402.81893631001185,
+          602.7254977811308
+        ],
+        "inside": [
+          328.08826801872823,
+          573.9265826902108
+        ]
+      },
+      "assemblies": 33,
+      "vertices": 66150,
+      "pageViolations": 0,
+      "coverViolations": 0,
+      "minClearance": 0.012,
+      "failures": {},
+      "chapter": 0,
+      "unfold": 0.8,
+      "turnProgress": 0.9,
+      "turnActive": true
+    }
+  }
+}
