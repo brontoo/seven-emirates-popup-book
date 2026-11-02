@@ -7,8 +7,9 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "node --test tests/kinematics.test.js && playwright test",
-    "test:mechanics": "node --test tests/kinematics.test.js"
+    "test": "node --test tests/*.test.js && playwright test",
+    "test:mechanics": "node --test tests/*.test.js",
+    "test:production": "npm run build && node tests/production.mjs"
   },
   "dependencies": {
     "@fontsource/dm-sans": "^5.3.0",

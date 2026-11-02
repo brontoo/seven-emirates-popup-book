@@ -6,7 +6,7 @@ export function paperTexture(label = "") {
   canvas.width = 1024;
   canvas.height = 1024;
   const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#eee7d5";
+  ctx.fillStyle = "#eee1c7";
   ctx.fillRect(0, 0, 1024, 1024);
   let seed = 21;
   const random = () => {

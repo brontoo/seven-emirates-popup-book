@@ -1178,3 +1178,208 @@ footer > span {
     gap: 10px;
   }
 }
+/* The chapter is lit and framed to match the supplied paper diorama reference. */
+.reference-scene {
+  height: 900px;
+  color: #49594c;
+  background: #e4e2df;
+}
+.reference-scene .hero-copy {
+  top: 35px;
+}
+.reference-scene h1 {
+  font-size: 61px;
+}
+.reference-scene h1 em {
+  color: #8a917b;
+}
+.reference-scene .hero-copy p,
+.reference-scene .hero-copy .eyebrow,
+.reference-scene .chapter-marker > .eyebrow {
+  color: #717a6c;
+}
+.reference-scene .arabic {
+  color: #7e8771;
+}
+.reference-scene .chapter-marker i {
+  color: #8d9586;
+}
+.reference-scene .scene-note {
+  color: #6e7d68;
+}
+.reference-scene .scene-tools .icon-button {
+  color: #63745f;
+}
+.reference-scene .chapter-bar {
+  border-color: #c6cabd;
+}
+.reference-scene .chapter-number {
+  border-color: #c6cabd;
+  color: #8d997d;
+}
+.reference-scene .chapter-identity .eyebrow {
+  color: #7f8c73;
+}
+.reference-scene .chapter-subtitle {
+  color: #7a8872;
+  border-color: #c6cabd;
+}
+.reference-scene .round-button {
+  border-color: #a6b198;
+}
+.reference-scene .chapter-navigation i {
+  color: #8e9a80;
+}
+.reference-scene .opening-control {
+  color: #5e7058;
+}
+.reference-scene .opening-control small {
+  color: #89977d;
+}
+.reference-scene .opening-track {
+  background: #bec5b2;
+}
+.reference-scene .opening-track i,
+.reference-scene .opening-track i:after {
+  background: #8d9c7a;
+}
+.reference-scene .scene-loading {
+  color: #6b7f63;
+}
+.reference-scene .marker-line {
+  background: #c9cec1;
+}
+.reference-scene .scene-note a {
+  color: #617851;
+  border-color: #97a587;
+}
+.mechanism-inspector {
+  position: fixed;
+  top: 112px;
+  right: 18px;
+  width: 255px;
+  z-index: 50;
+  padding: 17px;
+  background: #25332bf2;
+  color: #e9e4d1;
+  border: 1px solid #7a8b6a;
+  border-radius: 4px;
+  font-size: 11px;
+  box-shadow: 0 8px 30px #0003;
+}
+.mechanism-inspector header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.mechanism-inspector header span {
+  font-size: 6px;
+  letter-spacing: 1px;
+  color: #b1bf9b;
+}
+.mechanism-inspector label {
+  display: block;
+  margin: 11px 0;
+  font-size: 10px;
+}
+.mechanism-inspector select {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 6px;
+  background: #edf0e4;
+  color: #344c35;
+  border: 0;
+}
+.mechanism-inspector input[type="range"] {
+  width: 100%;
+  accent-color: #bdcc9e;
+  margin-top: 10px;
+}
+.mechanism-inspector output {
+  float: right;
+}
+.mechanism-inspector .inspector-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mechanism-inspector input[type="checkbox"] {
+  accent-color: #b3c89b;
+}
+.mechanism-inspector button {
+  width: 100%;
+  padding: 7px;
+  margin-top: 10px;
+  border: 1px solid #86987a;
+  background: none;
+  color: #e1e6d1;
+  font-size: 10px;
+}
+.inspector-report {
+  display: grid;
+  gap: 7px;
+  border-top: 1px solid #69775f;
+  padding-top: 11px;
+  margin-top: 14px;
+}
+.inspector-report span,
+.inspector-report small {
+  font-size: 8px;
+  line-height: 1.7;
+  color: #bac5a6;
+}
+.inspector-report strong {
+  font-size: 10px;
+  font-weight: 500;
+}
+@media (min-width: 1600px) {
+  .reference-scene {
+    height: 1000px;
+  }
+  .reference-scene h1 {
+    font-size: 75px;
+  }
+}
+@media (max-width: 1050px) {
+  .reference-scene {
+    height: 830px;
+  }
+  .reference-scene h1 {
+    font-size: 54px;
+  }
+}
+@media (max-width: 700px) {
+  .reference-scene {
+    height: 810px;
+  }
+  .reference-scene .hero-copy {
+    top: 29px;
+  }
+  .reference-scene h1 {
+    font-size: 57px;
+  }
+  .reference-scene .scene-wrap {
+    inset: 180px -9% 110px;
+  }
+  .mechanism-inspector {
+    top: 90px;
+    right: 6px;
+    width: 213px;
+  }
+  .reference-scene .chapter-subtitle {
+    display: none;
+  }
+}
+.inspector-report pre {
+  max-height: 180px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font: 8px/1.5 monospace;
+}
+.inspector-report summary {
+  cursor: pointer;
+  font-size: 9px;
+}

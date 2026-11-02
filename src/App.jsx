@@ -9,6 +9,9 @@ import {
 } from "react";
 import { chapters, landmarks } from "./data/chapters";
 import { supportsWebGL, useMedia } from "./hooks/usePreferences";
+const MechanismInspector = import.meta.env.DEV
+  ? lazy(() => import("./dev/MechanismInspector"))
+  : null;
 const Scene = lazy(() => import("./book/Scene"));
 export function Icon({ name, size = 20, ...props }) {
   const paths = {
@@ -166,6 +169,22 @@ export default function App() {
   );
   const [webgl, setWebgl] = useState(supportsWebGL);
   const [sceneReady, setSceneReady] = useState(false);
+  const [debug, setDebug] = useState(() => ({
+    enabled:
+      import.meta.env.DEV &&
+      new URLSearchParams(location.search).has("inspect"),
+    stage:
+      import.meta.env.DEV &&
+      new URLSearchParams(location.search).has("inspect") &&
+      "abcde".includes(new URLSearchParams(location.search).get("stage"))
+        ? new URLSearchParams(location.search).get("stage") || "e"
+        : "e",
+    hinges: false,
+    axes: false,
+    attachments: false,
+  }));
+  const [report, setReport] = useState(null);
+  const onReport = useCallback((value) => setReport(value), []);
   const onSceneReady = useCallback(() => setSceneReady(true), []);
   const [chapter, setChapter] = useState(0),
     [selected, setSelected] = useState(null);
@@ -266,9 +285,20 @@ export default function App() {
           A STORY IN PAPER
         </div>
       </header>
+      {import.meta.env.DEV && debug.enabled && (
+        <Suspense fallback={null}>
+          <MechanismInspector
+            progress={bookOpenProgress}
+            onProgress={onProgress}
+            debug={debug}
+            setDebug={setDebug}
+            report={report}
+          />
+        </Suspense>
+      )}
       <main>
         <section
-          className="experience"
+          className="experience reference-scene"
           aria-label="Interactive pop-up book"
           data-book-progress={bookOpenProgress.toFixed(4)}
           data-scene-ready={sceneReady}
@@ -293,6 +323,8 @@ export default function App() {
                     lowPower={lowPower}
                     onContextLost={onFailure}
                     onSceneReady={onSceneReady}
+                    debug={debug}
+                    onReport={onReport}
                   />
                 </Suspense>
               </SceneBoundary>
@@ -390,9 +422,7 @@ export default function App() {
                 <h2>
                   {active.title}
                   <span className="chapter-subtitle">
-                    {canChangeChapter
-                      ? active.subtitle
-                      : "Close the cover to change chapters"}
+                    {active.subtitle}
                   </span>
                 </h2>
               </div>
@@ -506,8 +536,8 @@ export default function App() {
       {modal === "chapters" && (
         <Modal title="Seven Emirates. One book." onClose={() => setModal(null)}>
           <p className="modal-intro">
-            Our journey begins in Abu Dhabi. Close the cover to choose the Dubai
-            paper study; five more stories are waiting to be crafted.
+            This edition explores Abu Dhabi. Six more Emirates are waiting to be
+            crafted.
           </p>
           <div className="chapter-list">
             {chapters.map((c, i) => (
@@ -557,8 +587,8 @@ export default function App() {
           </p>
           <p className="muted">
             This standalone prototype uses procedural paper models. Every paper
-            hinge follows your hand. Abu Dhabi is the first chapter; Dubai is a
-            folding study. Close the book before changing chapters.
+            hinge follows your hand. This edition focuses exclusively on Abu
+            Dhabi; the chapter system is ready for future Emirates.
           </p>
         </Modal>
       )}

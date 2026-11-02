@@ -23,25 +23,14 @@ export const landmarks = {
   },
   mangroves: {
     id: "mangroves",
-    label: "Mangrove National Park",
-    short: "The Mangroves",
-    category: "NATURE · COAST",
+    label: "Abu Dhabi’s coastal gardens",
+    short: "Coast & gardens",
+    category: "LANDSCAPE · COAST",
     number: "03",
     description:
-      "Beyond the skyline, a quieter world unfolds. Layered tidal water and paper-cut canopies celebrate Abu Dhabi’s coastal mangrove ecosystem.",
-    fact: "A coastal habitat · Abu Dhabi",
-    color: "#8a9b79",
-  },
-  burj: {
-    id: "burj",
-    label: "A study of Dubai",
-    short: "Dubai skyline study",
-    category: "CHAPTER PREVIEW",
-    number: "01",
-    description:
-      "A simple folded-paper skyline demonstrates how another chapter fits into the same book. This is a procedural study; the full Dubai chapter is still to come.",
-    fact: "Chapter 02 · Paper study",
-    color: "#b9b5a9",
+      "Palm-lined gardens meet the Arabian Gulf. Sage-green paper islands and overlapping pale blue coastline form the foreground of this handcrafted Abu Dhabi scene.",
+    fact: "Palm-lined gardens · The Arabian Gulf",
+    color: "#aab99b",
   },
 };
 export const chapters = [
@@ -53,23 +42,9 @@ export const chapters = [
     index: "01",
     landmarks: ["mosque", "towers", "mangroves"],
     available: true,
-    scene: [
-      { model: "mosque", side: "left", position: [-2.28, 0.025, -0.56] },
-      { model: "towers", side: "right", position: [2.65, 0.024, -0.52] },
-      { model: "mangroves", side: "right", position: [1.8, 0.026, 1.75] },
-    ],
+    scene: [],
   },
-  {
-    id: "dubai",
-    title: "Dubai",
-    arabic: "دبي",
-    subtitle: "A glimpse of the next chapter",
-    index: "02",
-    landmarks: ["burj"],
-    available: true,
-    study: true,
-    scene: [{ model: "burj", side: "left", position: [-2.2, 0.025, -0.4] }],
-  },
+  { id: "dubai", title: "Dubai", index: "02", available: false },
   { id: "sharjah", title: "Sharjah", index: "03", available: false },
   { id: "ajman", title: "Ajman", index: "04", available: false },
   {

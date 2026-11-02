@@ -7,11 +7,11 @@ export default function BookSpine({ progress }) {
       <Block
         position={[0.015, gap / 2 - 0.08, 0]}
         size={[0.16, 0.3 + gap, 5.78]}
-        color="#3d4d40"
+        color="#d8c7a4"
       />
       <group rotation={[0, 0, coverAngle(progress) / 2]}>
         <mesh
-          position={[0, gap / 2 - 0.02, 0]}
+          position={[0, gap / 2 - 0.2, 0]}
           rotation={[Math.PI / 2, 0, 0]}
           castShadow
         >

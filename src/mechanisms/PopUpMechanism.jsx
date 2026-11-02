@@ -14,6 +14,7 @@ export function PaperPanel({
   shape,
   color = "#eee6d2",
   thickness = 0.014,
+  edges = true,
   ...props
 }) {
   const geometry = useMemo(
@@ -28,7 +29,9 @@ export function PaperPanel({
   return (
     <mesh geometry={geometry} castShadow receiveShadow {...props}>
       <Paper color={color} />
-      <Edges threshold={25} color="#a69c81" transparent opacity={0.25} />
+      {edges && (
+        <Edges threshold={25} color="#a69c81" transparent opacity={0.25} />
+      )}
     </mesh>
   );
 }

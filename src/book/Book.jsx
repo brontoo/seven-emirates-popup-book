@@ -15,13 +15,12 @@ export default function Book({
   onDragging,
   onProgress,
   onSelect,
+  lowPower,
+  debug = { stage: "e" },
 }) {
   const handlers = useBookController({ progress, onProgress, onDragging });
   const active = chapters[chapter];
-  const entries = active.scene || [];
   const enabled = progress > 0.94 && !dragging;
-  const left = entries.filter((e) => e.side === "left"),
-    right = entries.filter((e) => e.side !== "left");
   return (
     <group position={[-2.18 * (1 - progress), 0.04, 0]} name="mechanical-book">
       <BookSpine progress={progress} />
@@ -39,7 +38,9 @@ export default function Book({
           />
         </group>
         <ChapterLandmarks
-          entries={left}
+          page="left"
+          lowPower={lowPower}
+          stage={debug.stage}
           progress={progress}
           enabled={enabled}
           onSelect={onSelect}
@@ -62,22 +63,24 @@ export default function Book({
         progress={progress}
       />
       <ChapterLandmarks
-        entries={right}
+        page="right"
+        lowPower={lowPower}
+        stage={debug.stage}
         progress={progress}
         enabled={enabled}
         onSelect={onSelect}
       />
       <VFold
         progress={progress}
-        position={[0, 0.018, -1.5]}
-        base={1.13}
-        ridge={1.05}
+        position={[0, 0.018, -2.25]}
+        base={0.26}
+        ridge={0.3}
       />
       <VFold
         progress={progress}
-        position={[0, 0.021, 0.7]}
-        base={0.75}
-        ridge={0.67}
+        position={[0, 0.021, 1.65]}
+        base={0.25}
+        ridge={0.2}
       />
       <Block
         position={[0.12, -0.12, 2.93]}

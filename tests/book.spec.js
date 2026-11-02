@@ -1,116 +1,139 @@
 import { test, expect } from "@playwright/test";
+import { mkdir, writeFile } from "node:fs/promises";
 const experience = (p) => p.locator(".experience");
 const progress = async (p) =>
   Number(await experience(p).getAttribute("data-book-progress"));
-async function load(page) {
-  await page.goto("/");
-  await expect(page.locator("canvas")).toBeVisible();
+async function load(page, query = "?inspect") {
+  await page.goto("/" + query);
   await expect(experience(page)).toHaveAttribute("data-scene-ready", "true", {
     timeout: 45000,
   });
-  await expect(
-    page.getByRole("slider", { name: "Book opening" }),
-  ).toHaveAttribute("aria-valuenow", "0");
+  await expect(experience(page)).toHaveAttribute(
+    "data-book-progress",
+    "0.0000",
+  );
 }
-async function keyboard(page, value) {
-  await page.getByRole("slider", { name: "Book opening" }).focus();
-  await page.keyboard.press("Home");
-  for (let i = 0; i < Math.round(value * 20); i++)
-    await page.keyboard.press("ArrowRight");
+async function report(page, value) {
+  await expect
+    .poll(
+      async () =>
+        JSON.parse((await page.locator("[data-audit]").textContent()) || "{}")
+          .progress,
+      { timeout: 15000 },
+    )
+    .toBe(value);
+  return JSON.parse(await page.locator("[data-audit]").textContent());
 }
+async function pose(page, value) {
+  await page
+    .getByRole("slider", { name: "Inspector book opening", exact: true })
+    .evaluate((el, value) => {
+      Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      ).set.call(el, String(value));
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }, value);
+  await expect(experience(page)).toHaveAttribute(
+    "data-book-progress",
+    value.toFixed(4),
+  );
+  return report(page, value);
+}
+const noInspector = {
+  style: ".mechanism-inspector{visibility:hidden!important}",
+};
 
-test("initial book stays closed; clicking does not open; dragging tracks, holds and reverses", async ({
+test("stages A–E preserve page constraints and the complete scene fits at all requested poses", async ({
   page,
 }) => {
+  test.setTimeout(180000);
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await load(page);
-  await page.waitForTimeout(1200);
-  expect(await progress(page)).toBe(0); // Explicit no-autoplay acceptance check.
-  await page.mouse.click(800, 430);
-  expect(await progress(page)).toBe(0);
-  await expect(
-    page.getByRole("button", { name: /The Grand Mosque/ }),
-  ).toBeDisabled();
-  await page.screenshot({
-    path: "artifacts/mechanical-closed.png",
-    fullPage: true,
-  });
-  await page.screenshot({ path: "artifacts/closed-book.png", fullPage: true });
-  await page.mouse.move(800, 430);
-  await page.mouse.down();
-  await expect(experience(page)).toHaveAttribute("data-dragging", "true");
-  // 1440px canvas: one full revolution uses 48% of its width.
-  await page.mouse.move(558.08, 430, { steps: 8 });
-  expect(await progress(page)).toBeCloseTo(0.35, 3);
-  await page.mouse.up();
-  await expect(experience(page)).toHaveAttribute("data-dragging", "false");
-  const held = await progress(page);
-  await page.waitForTimeout(500);
-  expect(await progress(page)).toBe(held);
-  await page.screenshot({
-    path: "artifacts/mechanical-35.png",
-    fullPage: true,
-  });
-  // Keyboard is a continuous accessible alternative, never a click-to-open trigger.
-  for (const value of [0.5, 0.6, 0.85, 1]) {
-    await keyboard(page, value);
-    expect(await progress(page)).toBeCloseTo(value, 3);
-    await page.screenshot({
-      path: `artifacts/mechanical-${Math.round(value * 100)}.png`,
-      fullPage: true,
-    });
-    if (value === 1)
-      await page.screenshot({ path: "artifacts/desktop.png", fullPage: true });
+  await load(page, "?inspect&stage=a");
+  const results = {};
+  await mkdir("artifacts/reference-rebuild", { recursive: true });
+  for (const stage of ["a", "b", "c", "d", "e"]) {
+    await page.getByLabel("Build stage").selectOption(stage);
+    results[stage] = {};
+    for (const value of stage === "e"
+      ? [0, 0.05, 0.1, 0.25, 0.5, 0.75, 1]
+      : [0, 0.5, 1]) {
+      const snapshot = await pose(page, value);
+      expect(snapshot.assemblies).toBeGreaterThan(0);
+      expect(snapshot.coverViolations).toBe(0);
+      expect(snapshot.pageViolations).toBe(0);
+      results[stage][value] = snapshot;
+      if (stage === "e" && [0, 0.25, 0.5, 0.75, 1].includes(value))
+        await page.screenshot({
+          path: `artifacts/reference-rebuild/${value * 100}.png`,
+          fullPage: true,
+          ...noInspector,
+        });
+    }
   }
-  await expect(
-    page.getByRole("button", { name: /The Grand Mosque/ }),
-  ).toBeEnabled();
-  await page.getByRole("button", { name: /The Grand Mosque/ }).click();
-  await expect(
-    page.getByRole("heading", { name: "Sheikh Zayed Grand Mosque" }),
-  ).toBeVisible();
+  await page.getByLabel("Hinge points", { exact: true }).check();
+  await page.getByLabel("Fold axes", { exact: true }).check();
+  await page.getByLabel("Attachment points", { exact: true }).check();
   await page.screenshot({
-    path: "artifacts/selected-landmark.png",
+    path: "artifacts/reference-rebuild/inspector.png",
     fullPage: true,
   });
-  // Return to the 3D book, capture its inside cover and close in one gesture.
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await page.mouse.move(430, 475);
-  await page.mouse.down();
-  await expect(experience(page)).toHaveAttribute("data-dragging", "true");
-  await page.mouse.move(775.6, 475, { steps: 10 });
-  expect(await progress(page)).toBeCloseTo(0.5, 3);
-  await page.mouse.move(500, 475, { steps: 8 });
-  expect(await progress(page)).toBeGreaterThan(0.8); // Reverse within the same held gesture.
-  await page.mouse.move(1125, 475, { steps: 12 });
-  await page.mouse.up();
+  await page.getByRole("button", { name: "Reset to closed" }).click();
   expect(await progress(page)).toBe(0);
-  await page.waitForTimeout(300);
-  expect(await progress(page)).toBe(0);
+  await writeFile(
+    "artifacts/reference-rebuild/validation.json",
+    JSON.stringify(results, null, 2),
+  );
   expect(errors).toEqual([]);
 });
 
-test("captured pointer keeps opening after it leaves the cover; cancellation holds the angle", async ({
+test("native cover dragging holds, reverses, leaves the cover, and closes repeatedly", async ({
   page,
 }) => {
   await load(page);
-  await page.mouse.move(800, 430);
+  const first = await report(page, 0);
+  await page.waitForTimeout(700);
+  expect(await progress(page)).toBe(0);
+  const travel = (await page.locator("canvas").boundingBox()).width * 0.48;
+  const start = first.grips.outside;
+  await page.mouse.click(...start);
+  expect(await progress(page)).toBe(0);
+  await page.mouse.move(...start);
   await page.mouse.down();
-  await page.mouse.move(108, 700, { steps: 16 });
-  expect(await progress(page)).toBe(1);
-  await page.mouse.up();
-  await expect(experience(page)).toHaveAttribute("data-dragging", "false");
-  await keyboard(page, 0);
-  await page.mouse.move(800, 430);
-  await page.mouse.down();
-  await page.mouse.move(627.2, 430, { steps: 6 });
-  await page.locator("canvas").dispatchEvent("pointercancel", { pointerId: 1 });
+  await expect(experience(page)).toHaveAttribute("data-dragging", "true");
+  await page.mouse.move(start[0] - travel * 0.5, start[1], { steps: 10 });
+  expect(await progress(page)).toBeCloseTo(0.5, 3);
+  await page.mouse.move(start[0] - travel * 0.25, start[1], { steps: 7 });
   expect(await progress(page)).toBeCloseTo(0.25, 3);
-  await expect(experience(page)).toHaveAttribute("data-dragging", "false");
+  await page.mouse.up();
+  await page.waitForTimeout(350);
+  expect(await progress(page)).toBeCloseTo(0.25, 3);
+  await pose(page, 0);
+  for (let cycle = 0; cycle < 2; cycle++) {
+    const closed = await report(page, 0);
+    await page.mouse.move(...closed.grips.outside);
+    await page.mouse.down();
+    await page.mouse.move(
+      closed.grips.outside[0] - travel,
+      closed.grips.outside[1],
+      { steps: 12 },
+    );
+    await page.mouse.up();
+    expect(await progress(page)).toBe(1);
+    const open = await report(page, 1);
+    await page.mouse.move(...open.grips.inside);
+    await page.mouse.down();
+    await expect(experience(page)).toHaveAttribute("data-dragging", "true");
+    await page.mouse.move(open.grips.inside[0] + travel, open.grips.inside[1], {
+      steps: 12,
+    });
+    await page.mouse.up();
+    expect(await progress(page)).toBe(0);
+  }
 });
 
-test("touch pointer capture, reverse drag, reduced motion and mobile layout", async ({
+test("native touch follows the cover in both directions and mobile framing stays within the viewport", async ({
   browser,
 }) => {
   const context = await browser.newContext({
@@ -121,89 +144,107 @@ test("touch pointer capture, reverse drag, reduced motion and mobile layout", as
   });
   const page = await context.newPage();
   await load(page);
-  const client = await context.newCDPSession(page);
-  await client.send("Input.dispatchTouchEvent", {
+  const audit = await report(page, 0);
+  const cdp = await context.newCDPSession(page);
+  const travel = Math.max(
+      200,
+      (await page.locator("canvas").boundingBox()).width * 0.48,
+    ),
+    [x, y] = audit.grips.outside;
+  await cdp.send("Input.dispatchTouchEvent", {
     type: "touchStart",
-    touchPoints: [{ x: 238, y: 470 }],
+    touchPoints: [{ x, y }],
   });
   await expect(experience(page)).toHaveAttribute("data-dragging", "true");
-  const travel = Math.max(
-    200,
-    (await page.locator("canvas").boundingBox()).width * 0.48,
-  );
   for (let i = 1; i <= 8; i++)
-    await client.send("Input.dispatchTouchEvent", {
+    await cdp.send("Input.dispatchTouchEvent", {
       type: "touchMove",
-      touchPoints: [{ x: 238 - (i * travel * 0.5) / 8, y: 470 }],
+      touchPoints: [{ x: x - (travel * 0.5 * i) / 8, y }],
     });
   await expect.poll(() => progress(page)).toBeCloseTo(0.5, 2);
-  await client.send("Input.dispatchTouchEvent", {
+  await cdp.send("Input.dispatchTouchEvent", {
     type: "touchMove",
-    touchPoints: [{ x: 238 - travel * 0.35, y: 470 }],
+    touchPoints: [{ x: x - travel * 0.25, y }],
   });
-  await expect.poll(() => progress(page)).toBeCloseTo(0.35, 2);
-  await client.send("Input.dispatchTouchEvent", {
-    type: "touchMove",
-    touchPoints: [{ x: 238 - travel * 0.5, y: 470 }],
-  });
-  await expect.poll(() => progress(page)).toBeCloseTo(0.5, 2);
-  await client.send("Input.dispatchTouchEvent", {
+  await expect.poll(() => progress(page)).toBeCloseTo(0.25, 2);
+  await cdp.send("Input.dispatchTouchEvent", {
     type: "touchEnd",
     touchPoints: [],
   });
-  const held = await progress(page);
   await page.waitForTimeout(250);
-  expect(await progress(page)).toBe(held);
+  expect(await progress(page)).toBeCloseTo(0.25, 2);
+  await pose(page, 1);
   await page.screenshot({
-    path: "artifacts/mechanical-mobile-half.png",
+    path: "artifacts/reference-rebuild/mobile-open.png",
     fullPage: true,
+    ...noInspector,
   });
-  await keyboard(page, 1);
-  await page.screenshot({
-    path: "artifacts/mechanical-mobile-open.png",
-    fullPage: true,
+  const opened = await report(page, 1);
+  const [ix, iy] = opened.grips.inside;
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchStart",
+    touchPoints: [{ x: ix, y: iy }],
   });
-  await page.screenshot({ path: "artifacts/mobile.png", fullPage: true });
+  await expect(experience(page)).toHaveAttribute("data-dragging", "true");
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchMove",
+    touchPoints: [{ x: ix + travel, y: iy }],
+  });
+  await expect.poll(() => progress(page)).toBe(0);
+  await cdp.send("Input.dispatchTouchEvent", {
+    type: "touchEnd",
+    touchPoints: [],
+  });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
     390,
   );
-  await page.getByRole("button", { name: "Experience settings" }).click();
-  await expect(
-    page.getByRole("checkbox", { name: /Reduced motion/ }),
-  ).toBeChecked();
-  await page.getByRole("checkbox", { name: /Lighter rendering/ }).check();
-  await page.getByRole("button", { name: "Close dialog" }).click();
-  await keyboard(page, 0);
   await page.screenshot({
-    path: "artifacts/mechanical-mobile-closed.png",
+    path: "artifacts/reference-rebuild/mobile-closed.png",
     fullPage: true,
+    ...noInspector,
   });
   await context.close();
 });
 
-test("chapters change only when safely closed, then unfold with the same controller", async ({
+test("student route hides the inspector, gates selections and exposes only Abu Dhabi", async ({
   page,
 }) => {
-  await load(page);
-  await keyboard(page, 0.5);
+  await load(page, "");
   await expect(
-    page.getByRole("button", { name: "Next chapter", exact: true }),
+    page.getByRole("complementary", {
+      name: "Development mechanism inspector",
+    }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: /The Grand Mosque/ }),
   ).toBeDisabled();
-  await keyboard(page, 0);
-  await page.getByRole("button", { name: "Next chapter", exact: true }).click();
-  expect(await progress(page)).toBe(0);
-  await expect(page.locator(".chapter-identity h2")).toContainText("Dubai");
-  await keyboard(page, 1);
-  await page.getByRole("button", { name: /Dubai skyline study/ }).click();
+  await page.getByRole("slider", { name: "Book opening", exact: true }).focus();
+  await page.keyboard.press("End");
+  await page.getByRole("button", { name: /The Grand Mosque/ }).click();
   await expect(
-    page.getByRole("heading", { name: "A study of Dubai" }),
+    page.getByRole("heading", { name: "Sheikh Zayed Grand Mosque" }),
   ).toBeVisible();
-  await keyboard(page, 0);
-  await page.getByRole("button", { name: "Previous chapter" }).click();
-  await expect(page.locator(".chapter-identity h2")).toContainText("Abu Dhabi");
+  await page.getByRole("button", { name: /Etihad Towers/ }).click();
+  await expect(page.locator(".landmark-story")).toContainText(
+    "Five sculptural towers",
+  );
+  await page.getByRole("button", { name: /Coast & gardens/ }).click();
+  await expect(
+    page.getByRole("heading", { name: "Abu Dhabi’s coastal gardens" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: /The collection/ }).click();
+  await expect(
+    page.getByRole("button", { name: /02 Dubai COMING LATER/ }),
+  ).toBeDisabled();
+  await page.getByRole("button", { name: "Close dialog" }).click();
+  await page.getByRole("slider", { name: "Book opening", exact: true }).focus();
+  await page.keyboard.press("Home");
+  expect(await progress(page)).toBe(0);
 });
 
-test("no-WebGL fallback preserves stories and navigation", async ({ page }) => {
+test("no-WebGL paper edition retains accessible landmark stories", async ({
+  page,
+}) => {
   await page.addInitScript(() => {
     const get = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function (type, ...args) {
@@ -218,29 +259,39 @@ test("no-WebGL fallback preserves stories and navigation", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "Sheikh Zayed Grand Mosque" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Next chapter", exact: true }).click();
-  await expect(page.locator(".chapter-identity h2")).toContainText("Dubai");
 });
 
-test("3D landmark picking takes priority over the cover behind it", async ({
+test("native mesh selection and lighter rendering retain the complete reference scene", async ({
   page,
 }) => {
-  await load(page);
-  await keyboard(page, 1);
-  // Wait for the final rendered pose before targeting actual mesh pixels.
-  await page.screenshot({ path: "artifacts/mechanical-picking-pose.png" });
-  await page.mouse.click(615, 360);
+  await load(page, "");
+  await page.getByRole("slider", { name: "Book opening", exact: true }).focus();
+  await page.keyboard.press("End");
+  await page.screenshot({
+    path: "artifacts/reference-rebuild/picking-pose.png",
+  });
+  await page.mouse.click(790, 610);
   await expect(
     page.getByRole("heading", { name: "Sheikh Zayed Grand Mosque" }),
   ).toBeVisible();
-  await expect(experience(page)).toHaveAttribute("data-dragging", "false");
-  await page.mouse.click(910, 350);
-  await expect(page.locator(".landmark-story")).toContainText(
-    "Five sculptural towers",
-  );
-  await page.mouse.click(770, 535);
+  await page.screenshot({
+    path: "artifacts/selected-landmark.png",
+    fullPage: true,
+  });
+  await page.mouse.click(750, 300);
   await expect(
-    page.getByRole("heading", { name: "Mangrove National Park" }),
+    page.getByRole("heading", { name: "Etihad Towers", exact: true }).last(),
   ).toBeVisible();
+  await page.mouse.click(1030, 704);
+  await expect(
+    page.getByRole("heading", { name: "Abu Dhabi’s coastal gardens" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Experience settings" }).click();
+  await page.getByRole("checkbox", { name: /Lighter rendering/ }).check();
+  await page.getByRole("button", { name: "Close dialog" }).click();
+  await expect(page.locator("canvas")).toBeVisible();
   expect(await progress(page)).toBe(1);
+  await expect(
+    page.getByText("THE PAPER EDITION", { exact: true }),
+  ).toHaveCount(0);
 });
